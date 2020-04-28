@@ -7,15 +7,15 @@ spring:
     oauth2:
       client:
         registration:
-          CAS:
+          cas:
             client-id: gis
             client-secret: 123456
             client-name: 中国联通系统集成
             authorizationGrantType: authorization_code
-            redirectUri: http://127.0.0.1:8081/login/oauth2/code/cas
+            redirectUri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
         provider:
-          CAS:
+          cas:
             authorization-uri: http://127.0.0.1:8080/cas/oauth/authorize
             token-uri: http://127.0.0.1:8080/cas/oauth/token
-            user-info-uri: http://127.0.0.1:8080/cas/oauth2/v1/userinfo
-            user-name-attribute: sub
+            user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/userinfo
+            user-name-attribute: username
