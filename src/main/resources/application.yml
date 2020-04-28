@@ -1,0 +1,21 @@
+server:
+  port: 8081
+spring:
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          CAS:
+            client-id: gis
+            client-secret: 123456
+            client-name: 中国联通系统集成
+            authorizationGrantType: authorization_code
+            redirectUri: http://127.0.0.1:8081/login/oauth2/code/cas
+        provider:
+          CAS:
+            authorization-uri: http://127.0.0.1:8080/cas/oauth/authorize
+            token-uri: http://127.0.0.1:8080/cas/oauth/token
+            user-info-uri: http://127.0.0.1:8080/cas/oauth2/v1/userinfo
+            user-name-attribute: sub
