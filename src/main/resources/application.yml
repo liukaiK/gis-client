@@ -3,22 +3,22 @@ server:
 spring:
   thymeleaf:
     cache: false
-  security:
-    oauth2:
-      client:
-        registration:
-          cas:
-            client-id: gis
-            client-secret: 123456
-            client-name: 中国联通系统集成
-            authorizationGrantType: authorization_code
-            redirectUri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
-        provider:
-          cas:
-            authorization-uri: http://127.0.0.1:8080/cas/oauth/authorize
-            token-uri: http://127.0.0.1:8080/cas/oauth/token
-            user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/userinfo
-            user-name-attribute: username
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          cas:
+#            client-id: gis
+#            client-secret: 123456
+#            client-name: 中国联通系统集成
+#            authorizationGrantType: authorization_code
+#            redirectUri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
+#        provider:
+#          cas:
+#            authorization-uri: http://127.0.0.1:8080/cas/oauth/authorize
+#            token-uri: http://127.0.0.1:8080/cas/oauth/token
+#            user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/userinfo
+#            user-name-attribute: username
 
 logging:
   level:

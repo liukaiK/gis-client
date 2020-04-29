@@ -1,0 +1,29 @@
+<security:authentication-manager alias="authenticationManager">
+    <security:authentication-provider ref="casAuthenticationProvider"/>
+</security:authentication-manager>
+
+<bean id="casAuthenticationProvider" class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
+<property name="authenticationUserDetailsService">
+    <bean class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+        <constructor-arg ref="userService"/>
+    </bean>
+</property>
+<property name="serviceProperties" ref="serviceProperties"/>
+<property name="ticketValidator">
+    <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+        <constructor-arg index="0" value="https://localhost:9443/cas"/>
+    </bean>
+</property>
+<property name="key" value="an_id_for_this_auth_provider_only"/>
+</bean>
+
+<security:user-service id="userService">
+<!-- Password is prefixed with {noop} to indicate to DelegatingPasswordEncoder that
+NoOpPasswordEncoder should be used.
+This is not safe for production, but makes reading
+in samples easier.
+Normally passwords should be hashed using BCrypt -->
+<security:user name="joe" password="{noop}joe" authorities="ROLE_USER"/>
+...
+</security:user-service>
+
