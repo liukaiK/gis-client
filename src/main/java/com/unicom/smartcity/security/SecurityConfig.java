@@ -18,10 +18,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
-                .formLogin()
-                .and()
                 .oauth2Login()
                 .successHandler(new SimpleUrlAuthenticationSuccessHandler("/"));
+//                .and()
+//                .logout()
+//                .logoutSuccessUrl("{baseUrl}/{action}/oauth2/code/{registrationId}");
 //                .loginPage("/login/oauth2");
     }
 
