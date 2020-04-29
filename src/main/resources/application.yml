@@ -19,3 +19,7 @@ spring:
             token-uri: http://127.0.0.1:8080/cas/oauth/token
             user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/userinfo
             user-name-attribute: username
+
+logging:
+  level:
+    com.unicom.smartcity: debug

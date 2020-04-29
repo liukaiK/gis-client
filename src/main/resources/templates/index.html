@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
@@ -10,6 +10,12 @@
 
 <body>
 
+<p>Id: <span sec:authentication="name"></span></p>
+<p>Role: <span sec:authentication="authorities"></span></p>
+
+<form th:action="@{/logout}" th:method="POST">
+    <input th:type="submit" value="退出"/>
+</form>
 
 </body>
 <script th:inline="javascript" type="text/javascript">

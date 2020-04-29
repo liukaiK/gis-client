@@ -4,12 +4,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 /**
  * @author liukai
  */
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -18,7 +20,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .and()
-                .oauth2Login();
+                .oauth2Login()
+                .successHandler(new SimpleUrlAuthenticationSuccessHandler("/"));
 //                .loginPage("/login/oauth2");
     }
 
