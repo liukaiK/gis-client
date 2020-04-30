@@ -1,5 +1,6 @@
 package com.unicom.smartcity.security.cas;
 
+import org.jasig.cas.client.session.SingleSignOutFilter;
 import org.jasig.cas.client.validation.Cas30ServiceTicketValidator;
 import org.jasig.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
+import org.springframework.security.cas.web.authentication.ServiceAuthenticationDetails;
 import org.springframework.security.cas.web.authentication.ServiceAuthenticationDetailsSource;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,27 +23,52 @@ import org.springframework.security.core.userdetails.UserDetailsByNameServiceWra
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 public class CasSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
 
     @Autowired
-    private AuthenticationDetailsSource authenticationDetailsSource;
+    private CasProperties casProperties;
+
+    @Autowired
+    private AuthenticationDetailsSource<HttpServletRequest, ServiceAuthenticationDetails> authenticationDetailsSource;
 
     @Override
     public void configure(HttpSecurity http) {
         CasAuthenticationFilter casAuthenticationFilter = new CasAuthenticationFilter();
         casAuthenticationFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
         casAuthenticationFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
         http.addFilter(casAuthenticationFilter);
+
+        http.addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
+
+        http.addFilterBefore(requestSingleLogoutFilter(), LogoutFilter.class);
 
     }
 
 
     @Bean
-    public AuthenticationDetailsSource authenticationDetailsSource(ServiceProperties serviceProperties) {
+    public SingleSignOutFilter singleSignOutFilter() {
+        SingleSignOutFilter singleSignOutFilter = new SingleSignOutFilter();
+        singleSignOutFilter.setIgnoreInitConfiguration(true);
+        singleSignOutFilter.setCasServerUrlPrefix(casProperties.getCasServerPrefix());
+        return singleSignOutFilter;
+    }
+
+    @Bean
+    public LogoutFilter requestSingleLogoutFilter() {
+        LogoutFilter logoutFilter = new LogoutFilter(casProperties.getCasServerLogout(), new SecurityContextLogoutHandler());
+        logoutFilter.setFilterProcessesUrl(casProperties.getCasClientLogoutRelative());
+        return logoutFilter;
+    }
+
+    @Bean
+    public AuthenticationDetailsSource<HttpServletRequest, ServiceAuthenticationDetails> authenticationDetailsSource(ServiceProperties serviceProperties) {
         return new ServiceAuthenticationDetailsSource(serviceProperties);
     }
 
@@ -49,19 +77,20 @@ public class CasSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecu
         CasAuthenticationEntryPoint casAuthenticationEntryPoint = new CasAuthenticationEntryPoint();
         casAuthenticationEntryPoint.setServiceProperties(serviceProperties);
         //请求客户端  会跳转到CAS 去登录
-        casAuthenticationEntryPoint.setLoginUrl("http://127.0.0.1:8080/cas/login");
+        casAuthenticationEntryPoint.setLoginUrl(casProperties.getCasServerLogin());
         return casAuthenticationEntryPoint;
     }
 
     @Bean
     public ServiceProperties serviceProperties() {
         ServiceProperties serviceProperties = new ServiceProperties();
-        serviceProperties.setService("http://127.0.0.1:8081/login/cas");
+        //回调地址
+        serviceProperties.setService(casProperties.getCasClientLogin());
         return serviceProperties;
     }
 
     @Bean
-    public CasAuthenticationProvider casAuthenticationProvider(AuthenticationUserDetailsService authenticationUserDetailsService, TicketValidator ticketValidator) {
+    public CasAuthenticationProvider casAuthenticationProvider(AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService, TicketValidator ticketValidator) {
         CasAuthenticationProvider casAuthenticationProvider = new CasAuthenticationProvider();
         casAuthenticationProvider.setAuthenticationUserDetailsService(authenticationUserDetailsService);
         casAuthenticationProvider.setTicketValidator(ticketValidator);
@@ -70,8 +99,8 @@ public class CasSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecu
     }
 
     @Bean
-    public AuthenticationUserDetailsService authenticationUserDetailsService(UserDetailsService userDetailsService) {
-        UserDetailsByNameServiceWrapper authenticationUserDetailsService = new UserDetailsByNameServiceWrapper();
+    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService(UserDetailsService userDetailsService) {
+        UserDetailsByNameServiceWrapper<CasAssertionAuthenticationToken> authenticationUserDetailsService = new UserDetailsByNameServiceWrapper<>();
         authenticationUserDetailsService.setUserDetailsService(userDetailsService);
         return authenticationUserDetailsService;
     }
@@ -79,8 +108,7 @@ public class CasSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecu
 
     @Bean
     public TicketValidator ticketValidator() {
-        TicketValidator ticketValidator = new Cas30ServiceTicketValidator("http://127.0.0.1:8080/cas");
-        return ticketValidator;
+        return new Cas30ServiceTicketValidator(casProperties.getCasServerPrefix());
     }
 
 
