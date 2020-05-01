@@ -18,6 +18,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
+                .logout().logoutSuccessUrl("http://127.0.0.1:8080/cas/logout")
+                .and()
                 .oauth2Login()
                 .successHandler(new SimpleUrlAuthenticationSuccessHandler("/"));
 //                .and()
