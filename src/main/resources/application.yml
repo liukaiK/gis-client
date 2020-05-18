@@ -17,7 +17,7 @@ spring:
           cas:
             authorization-uri: http://127.0.0.1:8080/cas/oauth/authorize
             token-uri: http://127.0.0.1:8080/cas/oauth/token
-            user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/userinfo
+            user-info-uri: http://127.0.0.1:8080/cas/oauth2/api/user_info
             user-name-attribute: username
 
 logging:
